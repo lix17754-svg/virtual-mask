@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>请摘下你的虚拟面具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+            min-height: 100vh;
+            /* 添加手机端滚动平滑 */
+            -webkit-overflow-scrolling: touch;
+        }
+        /* 移动端安全区适配 */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+        }
+        .option-btn {
+            transition: all 0.3s ease;
+        }
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        .element-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        @keyframes float-tag {
+            0%, 100% { transform: translateY(0) rotate(var(--tw-rotate)); }
+            50% { transform: translateY(-10px) rotate(var(--tw-rotate)); }
+        }
+        .animate-float-tag {
+            animation: float-tag 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 py-8">
+
+    <div id="app" class="w-full max-w-md">
+        <!-- Home Screen -->
+        <div id="home-screen" class="glass-panel text-center fade-in overflow-hidden relative">
+            <!-- 夸张的顶部图片区域 -->
+            <div class="relative w-full h-64 bg-black overflow-hidden group">
+                <!-- 直接引用我们刚刚从桌面移过来的本地图片 -->
+                <img src="./mask.jpg" onerror="this.onerror=null; this.src='./mask.png'; this.onerror=null; this.src='./mask.jpeg';" alt="撕下面具" class="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700 ease-in-out filter contrast-125 mix-blend-screen">
+                
+                <!-- 叠加的夸张文字效果 (单排、右下角、较小字号) -->
+                <div class="absolute inset-0 flex items-end justify-end p-4 bg-gradient-to-t from-black/90 via-black/20 to-transparent">
+                    <h1 class="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 tracking-widest transform -skew-x-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        撕开你的职场面具
+                    </h1>
+                </div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="p-8">
+                <div class="inline-block bg-red-600/20 border border-red-500/50 text-red-400 text-xs font-bold px-3 py-1 rounded-full mb-6 tracking-widest uppercase animate-pulse">
+                    ⚠️ 极度真实 · 可能会被戳痛
+                </div>
+                
+                <p class="text-gray-300 mb-8 text-sm leading-loose">
+                    在格子间里，我们都在扮演着某个完美的NPC。<br>
+                    <span class="text-indigo-300 font-semibold">但脱下这层外衣，你的真实底色是什么？</span><br>
+                    <br>
+                    这不是那种烂大街的 MBTI，<br>
+                    这是一场直击灵魂的<strong class="text-red-400 text-base"> 20 个残酷拷问</strong>。<br>
+                    <span class="text-xs text-gray-500 mt-2 block">西游记职场宇宙 · 全新设定</span>
+                </p>
+
+                <!-- 夸张的按钮 -->
+                <button onclick="startTest()" class="relative w-full group overflow-hidden rounded-xl bg-gray-900 border border-red-500/30 hover:border-red-500 transition-all duration-300 shadow-[0_0_20px_rgba(239,68,68,0.2)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)]">
+                    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="relative px-6 py-4 flex items-center justify-center gap-2">
+                        <span class="text-white font-black text-lg tracking-widest uppercase">直面真实的自己</span>
+                        <svg class="w-5 h-5 text-white transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="question-screen" class="glass-panel p-8 hidden fade-in">
+            <div class="flex justify-between items-center mb-6 text-sm text-gray-300">
+                <button id="prev-btn" onclick="prevQuestion()" class="text-indigo-400 hover:text-indigo-300 focus:outline-none transition-colors hidden flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    上一题
+                </button>
+                <div class="flex-1 text-center font-mono" id="progress-text">1 / 20</div>
+            </div>
+            
+            <!-- 进度条独立放在一行 -->
+            <div class="w-full h-1.5 bg-gray-700/50 rounded-full overflow-hidden mb-8">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300" style="width: 5%"></div>
+            </div>
+
+            <h2 id="question-title" class="text-lg font-semibold mb-6 leading-relaxed">
+                题目加载中...
+            </h2>
+            <div id="options-container" class="space-y-4">
+                <!-- Options will be injected here -->
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="glass-panel p-8 hidden fade-in max-h-[85vh] overflow-y-auto custom-scrollbar">
+            <!-- Avatar Header (左右布局) -->
+            <div class="flex items-center justify-between mb-8 gap-4">
+                <!-- 左侧文字区 -->
+                <div class="flex-1 text-left">
+                    <p class="text-indigo-400 text-xs font-bold tracking-widest uppercase mb-1">测试完成</p>
+                    <h1 class="text-xl font-bold tracking-wider mb-2 text-gray-200">你的职场真身是</h1>
+                    <div id="result-title" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500 mb-3 tracking-wide drop-shadow-md">
+                        加载中...
+                    </div>
+                </div>
+                
+                <!-- 右侧头像区 (正方形) -->
+                <div class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-2xl overflow-hidden border-2 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)] bg-gray-800">
+                    <img id="result-image" src="" alt="角色头像" class="w-full h-full object-cover">
+                </div>
+            </div>
+            
+            <!-- Quote (全宽) -->
+            <div class="text-center mb-8">
+                <div class="bg-gray-800/60 rounded-lg p-4 border border-gray-600/50 inline-block w-full">
+                    <p id="result-quote" class="text-gray-300 italic text-sm">
+                        "加载中..."
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Summary -->
+            <div class="mb-6">
+                <h2 class="text-sm font-bold text-indigo-300 mb-2 flex items-center"><span class="mr-2">💡</span> 一句话总结</h2>
+                <p id="result-summary" class="text-gray-200 text-sm leading-relaxed bg-indigo-900/20 p-3 rounded border border-indigo-500/20">加载中...</p>
+            </div>
+
+            <!-- Explanation -->
+            <div class="mb-6">
+                <h2 class="text-sm font-bold text-indigo-300 mb-2 flex items-center"><span class="mr-2">📖</span> 人格解释</h2>
+                <p id="result-explanation" class="text-gray-300 text-sm leading-relaxed">加载中...</p>
+            </div>
+
+            <!-- Typical Behaviors -->
+            <div class="mb-6">
+                <h2 class="text-sm font-bold text-indigo-300 mb-2 flex items-center"><span class="mr-2">🎯</span> 典型表现</h2>
+                <ul id="result-behaviors" class="list-disc list-inside text-gray-300 text-sm space-y-1 ml-1">
+                    <!-- list items -->
+                </ul>
+            </div>
+
+            <!-- Pros & Cons Grid -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-green-900/20 p-4 rounded-lg border border-green-500/20">
+                    <h2 class="text-sm font-bold text-green-400 mb-2 flex items-center"><span class="mr-1">✨</span> 优势</h2>
+                    <ul id="result-pros" class="list-disc list-inside text-gray-300 text-xs space-y-1"></ul>
+                </div>
+                <div class="bg-red-900/20 p-4 rounded-lg border border-red-500/20">
+                    <h2 class="text-sm font-bold text-red-400 mb-2 flex items-center"><span class="mr-1">⚠️</span> 风险</h2>
+                    <ul id="result-cons" class="list-disc list-inside text-gray-300 text-xs space-y-1"></ul>
+                </div>
+            </div>
+
+            <!-- Advice -->
+            <div class="mb-8 bg-blue-900/20 p-4 rounded-lg border border-blue-500/20">
+                <h2 class="text-sm font-bold text-blue-400 mb-2 flex items-center"><span class="mr-2">🧭</span> 建议</h2>
+                <p id="result-advice" class="text-gray-300 text-sm leading-relaxed">加载中...</p>
+            </div>
+
+            <!-- Action Buttons (3块切分) -->
+            <div class="flex gap-3 mt-8">
+                <!-- 左边：联系作者 -->
+                <button onclick="showContactPage()" class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md text-indigo-200 font-medium py-3 px-2 rounded-2xl transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.2)] flex flex-col items-center justify-center gap-1.5 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <svg class="w-5 h-5 text-indigo-400 group-hover:scale-110 group-hover:text-indigo-300 transition-all duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    <span class="text-xs tracking-wider relative z-10">联系作者</span>
+                </button>
+                
+                <!-- 中间：重新测试 (主按钮) -->
+                <button onclick="restartTest()" class="flex-[2] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:via-purple-400 hover:to-pink-400 text-white font-bold py-3 px-4 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] shadow-lg text-base flex flex-col items-center justify-center relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span class="tracking-widest relative z-10">重新测试</span>
+                </button>
+
+                <!-- 右边：分享 -->
+                <button onclick="shareResult()" class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md text-pink-200 font-medium py-3 px-2 rounded-2xl transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.2)] flex flex-col items-center justify-center gap-1.5 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <svg class="w-5 h-5 text-pink-400 group-hover:scale-110 group-hover:text-pink-300 transition-all duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    <span class="text-xs tracking-wider relative z-10">分享结果</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div id="contact-screen" class="glass-panel p-8 hidden fade-in max-h-[85vh] overflow-y-auto custom-scrollbar relative">
+            <!-- 炫酷的漂浮背景元素 -->
+            <div class="absolute top-10 left-10 text-indigo-500/20 font-black text-4xl -rotate-12 select-none animate-pulse">Call Me</div>
+            <div class="absolute bottom-20 right-5 text-pink-500/20 font-black text-3xl rotate-12 select-none animate-bounce">Contact Me</div>
+            <div class="absolute top-1/2 left-4 text-purple-500/10 font-black text-5xl -rotate-90 select-none">CONNECT</div>
+            
+            <!-- 返回按钮 -->
+            <button onclick="backToResult()" class="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors flex items-center gap-1 bg-gray-800/50 px-3 py-1.5 rounded-full text-sm z-10 backdrop-blur-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                返回
+            </button>
+
+            <div class="text-center mt-8 mb-8 relative z-10">
+                <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 mb-2">找到组织，拒绝内耗</h1>
+                <p class="text-gray-400 text-sm">如果你喜欢这个测试，欢迎来找我聊聊</p>
+            </div>
+
+            <!-- 作者照片区 (放大处理) -->
+            <div class="relative w-48 h-48 mx-auto mb-12 group z-10">
+                <!-- 可爱动态悬浮标签 -->
+                <div class="absolute -top-3 -left-8 bg-gradient-to-br from-pink-400 to-rose-500 text-white text-xs font-black px-3 py-1.5 rounded-full -rotate-12 shadow-lg animate-float-tag border border-white/20 z-20" style="animation-delay: 0s;">e人</div>
+                <div class="absolute top-10 -right-10 bg-gradient-to-br from-indigo-400 to-purple-500 text-white text-xs font-black px-3 py-1.5 rounded-full rotate-12 shadow-lg animate-float-tag border border-white/20 z-20" style="animation-delay: 0.5s;">AIPM</div>
+                <div class="absolute bottom-8 -left-12 bg-gradient-to-br from-blue-400 to-cyan-500 text-white text-xs font-black px-3 py-1.5 rounded-full -rotate-6 shadow-lg animate-float-tag border border-white/20 z-20" style="animation-delay: 1s;">白日梦想家</div>
+                <div class="absolute -bottom-2 -right-6 bg-gradient-to-br from-orange-400 to-amber-500 text-white text-xs font-black px-3 py-1.5 rounded-full rotate-6 shadow-lg animate-float-tag border border-white/20 z-20" style="animation-delay: 1.5s;">搞钱要紧</div>
+
+                <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full blur opacity-70 group-hover:opacity-100 transition duration-500"></div>
+                <div class="relative w-full h-full rounded-full overflow-hidden border-4 border-gray-900 shadow-2xl transform group-hover:scale-105 transition-transform duration-500">
+                    <!-- 作者照片 -->
+                    <img src="./李秀慧.jpg" alt="作者李秀慧" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';">
+                </div>
+            </div>
+
+            <!-- 二维码区 -->
+            <div class="bg-gray-800/50 rounded-2xl p-6 border border-gray-700/50 text-center relative z-10 backdrop-blur-md">
+                <h3 class="text-white font-bold mb-4 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8.25 15.5c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm7.5 0c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25zm-3.75 3.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                    扫码添加我的微信
+                </h3>
+                <div class="w-40 h-40 mx-auto bg-white p-2 rounded-xl shadow-inner mb-4 transform hover:scale-110 transition-transform duration-300">
+                    <!-- 微信二维码 -->
+                    <img src="./微信.jpg" alt="微信二维码" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=HelloWorld';">
+                </div>
+                <p class="text-xs text-gray-400">添加时请备注：职场测试</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 核心属性定义：Fire(行动/目标), Ice(逻辑/秩序), Wind(创意/自由), Earth(共情/连结)
+        const questions = [
+            // PART 1: 面对外界的你 (社交伪装)
+            { id: 1, text: "你的直属上级离职后，领导让你帮忙替补工作，并暗示你：“再过一阵我去找大老板聊，这个组长位置大概率就是你的。”\n两周后，领导却在会上突然介绍了一位新人，并表示他将接任组长，带领大家继续工作\n这时候，你最真实的第一反应是？", options: [ { text: "先压住情绪，觉得领导可能也是被上面安排了，不一定是故意骗我", value: "obedience" }, { text: "觉得自己被画饼了，嘴上不说，心里已经开始重新评估这个领导", value: "observation" }, { text: "当场不表现出来，但之后一定找领导单独问清楚原因", value: "fairness" }, { text: "直接对这个团队失去期待，开始看机会，准备给自己留后路", value: "resource" } ] },
+            { id: 2, text: "你带着一个新项目，你的下属之前提出过一个方案，但因为资源、风险或方向等原因，你当时没有通过。\n结果在后续会议上，领导公开提出了这个方案，并且当着大家的面夸奖了你的下属，说这个想法很有价值。\n这时候，你会怎么处理？", options: [ { text: "表面认可领导和下属，心里有点尴尬，但先维护团队氛围", value: "social" }, { text: "会主动补充说明：这个方案之前讨论过，当时主要卡在某些条件上", value: "risk" }, { text: "会觉得很没面子，怀疑下属是不是绕过自己去和领导沟通了", value: "observation" }, { text: "先不急着反应，事后单独找下属和领导分别了解情况", value: "rebellion" } ] },
+            { id: 3, text: "你和几个同事一起出去买咖啡，其中有几位同事临时有紧急会议，拜托你顺手帮忙带回来。\n但你回到办公室后，另外两位没参与点单的同事看到你拿咖啡回来，以为你是请大家喝\n这时候，你会怎么处理？", options: [ { text: "当场笑着解释：“这个是他们刚才让我带的，不是我请客哈”", value: "boundary" }, { text: "觉得有点尴尬，但还是解释清楚，避免以后变成默认规则", value: "boundary" }, { text: "不好意思说破，先糊弄过去，但心里会很不舒服", value: "obedience" }, { text: "直接把情况说清楚：这几杯已经有人点了，不然下次我请你们", value: "social" } ] },
+            { id: 4, text: "你的领导换了，新领导带来了自己的嫡系，你明显感觉自己在团队里的空间变小，很多事情都不好推进。\n这时候，你的前领导告诉你可以去他那里。但你又从其他人口中听说，前领导在那边其实并不得人心，团队评价也比较一般。\n你会怎么做？", options: [ { text: "不会立刻答应，先多打听前领导现在团队的真实情况", value: "observation" }, { text: "觉得现在已经很难受了，先过去再说，至少前领导熟悉我", value: "obedience" }, { text: "两边都不完全信，开始认真看外部机会", value: "resource" }, { text: "先留在原团队观察一段时间，除非新领导真的把路堵死", value: "risk" } ] },
+            { id: 5, text: "如果让你选择，你最愿意跟随下面哪一种领导？", options: [ { text: "能给方向，也愿意在关键时候替下属扛事的领导", value: "social" }, { text: "能给资源和机会，但要求很高、压力也很大的领导", value: "resource" }, { text: "情绪稳定、沟通舒服，不随便甩锅和画饼的领导", value: "boundary" }, { text: "业务能力强，哪怕不温柔，但能让你真正学到东西的领导", value: "fairness" } ] },
+            { id: 6, text: "同事周末要出去玩，来找你借车。你的车是上个月刚买的新车，你其实有点不太愿意借\n这时候，你会怎么回应？", options: [ { text: "直接说车刚买，还不太方便外借", value: "boundary" }, { text: "找个理由婉拒，比如周末自己也要用车", value: "boundary" }, { text: "虽然不太愿意，但碍于关系还是借了，心里一直担心", value: "obedience" }, { text: "会问清楚用途、时间和保险情况，再决定借不借", value: "risk" } ] },
+            { id: 7, text: "同事对你说：“我最近活真的太多了，干也干不完，我记得你昨天说你今天不怎么忙，咱俩关系这么好，能不能帮我分担一部分？”\n这时候，你最真实的反应是？", options: [ { text: "先问清楚具体是什么活，如果不影响自己工作，可以帮一点", value: "social" }, { text: "心里很反感这种道德绑架，但表面会委婉拒绝", value: "boundary" }, { text: "不好意思拒绝，可能会接一部分，但心里觉得自己又被拿捏了", value: "obedience" }, { text: "直接说自己今天也有安排，不能因为“不忙”就默认接别人的活", value: "rebellion" } ] },
+            { id: 8, text: "有一个跨部门聚会，你其实和那边的人不熟，所以跟同事说不太想去。\n同事劝你：“怕什么，不是有我在吗？去呗，多认识点人也挺好的”\n你会怎么做？", options: [ { text: "如果同事真的会带着我社交，我可能会去试试", value: "social" }, { text: "还是不想去，不熟的局只会让我消耗自己", value: "boundary" }, { text: "表面答应，心里已经开始后悔为什么刚才没拒绝彻底", value: "obedience" }, { text: "会判断这个局有没有价值，有价值就去，纯尬聊就算了", value: "resource" } ] },
+            { id: 9, text: "你让同事帮忙带一个物品，实际价格是 18.6 元。同事收你钱的时候说：“给 18 就行，零头不用了”\n你会怎么处理？", options: [ { text: "直接转 18.6，不想让别人因为帮忙还倒贴", value: "fairness" }, { text: "转 19，并说“辛苦你帮我带啦”", value: "social" }, { text: "对方说 18 就给 18，觉得这只是小钱，不用太计较", value: "resource" }, { text: "这次接受抹零，但下次会主动请对方喝个东西补回来", value: "boundary" } ] },
+            { id: 10, text: "你这个月发了奖金。同事开玩笑说：“这个月就你发奖金了，上次就说下次请，这次总不能再推辞了吧？”\n这时候，你会怎么回应？", options: [ { text: "笑着说可以请奶茶", value: "social" }, { text: "心里不舒服，觉得奖金是我自己挣的，凭什么默认要请客", value: "fairness" }, { text: "为了不扫兴，还是会请一次，但之后会避免再提奖金的事", value: "boundary" }, { text: "半开玩笑地回：“等你发奖金也记得请我，我先记账了”", value: "rebellion" } ] },
+            
+            // PART 2: 独处时的你 (内心独白)
+            { id: 11, text: "你独立完成了一个重要方案，最后汇报效果不错。但领导在大群里总结时，只说“这是我们团队共同努力的结果”，没有单独提到你\n你的真实反应是？", options: [ { text: "虽然有点失落，但觉得团队成果也正常，下次再找机会表现", value: "obedience" }, { text: "心里很不爽，会想办法在后续汇报里补充自己的贡献", value: "rebellion" }, { text: "觉得领导不厚道，开始不想再默默多干", value: "fairness" }, { text: "会主动整理过程和成果，找机会让关键人看到自己的价值", value: "resource" } ] },
+            { id: 12, text: "一个项目出了问题，明明是同事没有及时同步信息，但他在会上说：“这个之前我以为你那边已经确认过了”\n这时候，你会怎么做？", options: [ { text: "当场澄清事实，但尽量保持语气平稳", value: "rebellion" }, { text: "先不正面冲突，会后拿聊天记录和时间线说清楚", value: "risk" }, { text: "心里很气，但怕场面难看，可能先忍下来", value: "obedience" }, { text: "直接反问他具体是哪一天、哪条信息确认过，别想模糊甩锅", value: "rebellion" } ] },
+            { id: 13, text: "领导突然安排你做一件和你职责关系不大的工作，还说：“你能力强，这个你来最稳”\n你的真实反应是？", options: [ { text: "先接下来，但会确认优先级和交付边界", value: "boundary" }, { text: "心里知道这是戴高帽分活，但还是不好拒绝", value: "obedience" }, { text: "会直接问这件事后续算不算我的正式职责", value: "fairness" }, { text: "表面答应，心里已经开始计算这份工作到底值不值得继续干", value: "resource" } ] },
+            { id: 14, text: "你无意中得知，一个能力和工作量都不如你的同事，薪资却比你高\n你的第一反应是？", options: [ { text: "很不平衡，但会先冷静判断是不是自己谈薪或争取不够", value: "observation" }, { text: "直接对公司公平性产生怀疑，开始想跳槽", value: "fairness" }, { text: "心里不舒服，但不敢表现出来，只能自己消化", value: "obedience" }, { text: "会整理自己的产出，找合适时机和领导谈涨薪或晋升", value: "resource" } ] },
+            { id: 15, text: "你提前很久请好了假，行程也安排好了。结果临近休假前，领导说项目有变，希望你先别休，回来之后再补\n你会怎么反应？", options: [ { text: "如果项目真的紧急，会沟通补偿和新的休假时间", value: "social" }, { text: "心里非常抗拒，但可能还是会配合", value: "obedience" }, { text: "会明确说明自己已经安排好行程，不能临时取消", value: "boundary" }, { text: "对公司好感大幅下降，觉得自己的生活完全不被尊重", value: "fairness" } ] },
+            { id: 16, text: "你因为加班、职责边界或绩效分配问题，向领导表达了自己的想法。\n领导听完后说：“年轻人不要太计较，要多看成长”\n你的真实反应是？", options: [ { text: "会继续追问：成长具体体现在哪里，能不能落实到机会或回报上", value: "resource" }, { text: "心里翻白眼，觉得这就是不想给实际补偿", value: "fairness" }, { text: "表面点头，但之后不会再轻易多付出", value: "boundary" }, { text: "会判断这个领导是不是只会讲情怀，如果是，就准备换环境", value: "observation" } ] },
+            { id: 17, text: "结束了兵荒马乱的一周，终于到了周五晚上，你此刻内心最大的渴望是：", options: [ { text: "把手机设为勿扰模式，彻底从职场人设中抽离出来，享受绝对的独处", value: "boundary" }, { text: "需要一场大汗淋漓的运动或一次疯狂的娱乐，把所有压力发泄出去", value: "rebellion" }, { text: "只想瘫在沙发上刷无脑视频，让大脑停止一切复杂的思考", value: "obedience" }, { text: "找最亲密的朋友或伴侣大吐苦水，渴望得到情绪价值和共鸣", value: "social" } ] },
+            { id: 18, text: "如果现在的工作让你感到极其内耗，你觉得最核心的原因往往是：", options: [ { text: "努力得不到相应的回报和认可，感觉自己在做无用功", value: "fairness" }, { text: "人际关系太复杂，每天要花大量时间去揣摩和迎合别人", value: "social" }, { text: "流程繁琐、朝令夕改，事情总是不在自己的掌控和秩序中", value: "risk" }, { text: "工作内容重复枯燥，觉得自己像个没有灵魂的螺丝钉", value: "observation" } ] },
+            { id: 19, text: "想象一下五年后的你，你最希望自己处于什么样的状态？", options: [ { text: "已经在这个行业站稳脚跟，有了足够的话语权和选择权", value: "resource" }, { text: "有一份极其稳定且边界清晰的工作，生活完全按自己的节奏进行", value: "boundary" }, { text: "可能已经换了好几个赛道，永远在体验不同的人生剧本", value: "observation" }, { text: "不再被焦虑裹挟，有时间陪伴家人，内心平和且丰盈", value: "social" } ] },
+            { id: 20, text: "最后，回想一下你这周在职场上的表现，你觉得你戴上面具的原因是：", options: [ { text: "为了保护自己不受伤，避免成为被枪打的出头鸟", value: "risk" }, { text: "为了达成目标，有时候必须演一下来获取资源和信任", value: "resource" }, { text: "为了不让别人失望，习惯性地想做一个“好人”", value: "obedience" }, { text: "懒得和他们解释，装一下可以省去很多麻烦和沟通成本", value: "observation" } ] }
+        ];
+
+        const personasData = {
+            "Fire_Wind": { 
+                title: "孙悟空型打工人", 
+                image: "./孙悟空.jpg", // 用户上传的孙悟空图
+                quote: "玉帝、如来！俺老孙被你们骗了，被你们骗了！", 
+                summary: "你不是不能干活，你是受不了别人一边让你干活，一边还想让你感恩。",
+                explanation: "孙悟空型用户通常能力强、反应快、执行力不错，但很讨厌不公平、不透明和只会画饼的领导。你可以接受困难任务，但不能接受别人糊弄你。你可以为了结果冲在前面，但不能接受功劳被抢、责任被甩、承诺不兑现。",
+                behaviors: ["对领导画饼非常敏感", "面对甩锅会想立刻澄清", "不喜欢被当成工具人", "对“年轻人多成长”这类话术免疫力较强", "一旦觉得不值得，就会迅速失去耐心"],
+                pros: ["有战斗力", "解决问题能力强", "对不合理现象敏感", "不容易被长期压榨"],
+                cons: ["容易在情绪上头时过快判断", "有时会显得不好管理", "如果表达方式太冲，可能影响合作关系"],
+                advice: "你可以继续保持清醒和锋利，但关键时刻要学会把“情绪反击”变成“事实反击”。比起直接发火，更有杀伤力的是拿出证据、边界和结果。"
+            },
+            "Ice_Earth": { 
+                title: "唐僧型打工人", 
+                image: "./唐僧.jpg", // 用户上传的唐僧图
+                quote: "你是无心向善，有意作恶，我断然不能留你了", 
+                summary: "你不是死板，你只是希望职场至少讲点规则和道理。",
+                explanation: "唐僧型用户很重视规则、秩序和正当性。你不是最激进的人，但你会在意事情是否合理、领导是否值得信任、团队是否有基本的尊重。你不喜欢灰色操作，也不喜欢模糊承诺。你可以配合，但你需要知道为什么。",
+                behaviors: ["重视领导的人品和原则", "不喜欢不清不楚的职责安排", "面对不合理要求，会想要解释", "对职场中的“画饼”和“情怀”保持怀疑", "做事希望名正言顺"],
+                pros: ["价值观稳定", "适合长期主义环境", "不容易被短期利益带偏", "做事有底线"],
+                cons: ["容易对现实职场的灰度感到失望", "有时会显得不够灵活", "面对复杂关系时可能消耗较大"],
+                advice: "你的原则感是优点，但职场里并不是所有问题都能立刻变得合理。你可以坚持底线，同时学会区分：哪些事情需要争，哪些事情只需要看清后远离。"
+            },
+            "Wind_Earth": { 
+                title: "猪八戒型打工人", 
+                image: "./猪八戒.jpg", // 用户上传的猪八戒图
+                quote: "这砍头可不能试呀，一试就死啦", 
+                summary: "你不是不上进，你只是很清楚工作不该吞掉整个人生。",
+                explanation: "猪八戒型用户非常现实。你不是不能吃苦，而是不想吃没有意义的苦。你会关注回报、压力、工作量和个人生活之间的平衡。比起虚无缥缈的成长，你更在意实际收益和当下感受。",
+                behaviors: ["对加班和临时任务天然抗拒", "不喜欢被额外消耗", "对奖金、薪资、请客这种利益问题较敏感", "能干活，但不喜欢白干", "不太吃“年轻人别计较”这一套"],
+                pros: ["很清楚自己的需求", "不容易被长期画饼", "重视生活质量", "能快速判断一件事值不值得"],
+                cons: ["有时容易被认为不够积极", "遇到长期目标时可能耐心不足", "容易在压力大时想逃离"],
+                advice: "你对回报和消耗的敏感是清醒的。但如果某件事真的能换来长期价值，也可以适当给自己一点阶段性投入，不要让“怕被消耗”变成“拒绝所有机会”。"
+            },
+            "Earth_Ice": { 
+                title: "沙僧型打工人", 
+                image: "./沙僧.jpg", // 用户上传的沙僧图
+                quote: "大师兄，师父被妖怪抓走了", 
+                summary: "你不是没有脾气，你只是习惯先把事情扛下来。",
+                explanation: "沙僧型用户通常稳定、可靠、责任心强。你容易成为团队里那个“不会出问题的人”。但问题是，别人也很容易因为你靠谱，就默认你应该多承担一点。",
+                behaviors: ["遇到任务会先接住", "不太喜欢公开冲突", "会维护团队稳定", "容易帮别人兜底", "经常被人觉得“交给你比较放心”"],
+                pros: ["稳定可靠", "责任心强", "能承压", "适合做团队里的关键执行者"],
+                cons: ["容易被过度依赖", "贡献可能被低估", "不拒绝会让别人不断试探你的边界"],
+                advice: "你可以继续靠谱，但不要让靠谱变成免费兜底。适当表达自己的工作量和边界，不是计较，而是在保护你的长期价值。"
+            },
+            "Earth_Earth": { 
+                title: "白龙马型打工人", 
+                image: "./白龙马.jpg", // 用户上传的白龙马图
+                quote: "我驮得动，只是这路途遥遥，何时才能到得西天？", 
+                summary: "你不是没有贡献，只是太习惯安静地把事做完。",
+                explanation: "白龙马型用户低调、稳定、可靠，但存在感不一定强。你经常把事情做好，却不太主动展示自己。你不喜欢抢功，也不喜欢过度表现，但这也可能导致你的付出被别人看轻。",
+                behaviors: ["不太主动邀功", "出问题时会先自己消化", "不喜欢成为焦点", "工作稳定但表达不足", "容易被归入“团队共同努力”"],
+                pros: ["踏实可靠", "不浮躁", "执行质量稳定", "给人安全感"],
+                cons: ["功劳容易被弱化", "晋升和机会可能被更会表达的人拿走", "情绪长期不说，容易慢慢失望"],
+                advice: "低调不是问题，但职场里“被看见”也很重要。你不需要变得高调，只需要在关键节点让别人知道：这件事是你做成的。"
+            },
+            "Wind_Wind": { 
+                title: "观音型打工人", 
+                quote: "你难道不知，我有百相嘛？", 
+                image: "./观音.jpg", // 用户上传的观音图
+                summary: "你不是圆滑，你是知道怎么让事情不难看地解决。",
+                explanation: "观音型用户很擅长处理人际关系。你能看懂别人的情绪，也知道如何在不撕破脸的情况下表达自己的意思。你不是盲目讨好，而是有策略地维持关系和边界。",
+                behaviors: ["擅长圆场", "能处理尴尬场景", "懂人情往来", "不喜欢硬碰硬", "会在关系和原则之间找平衡"],
+                pros: ["人际处理能力强", "情绪稳定", "适合跨团队合作", "容易获得他人信任"],
+                cons: ["太会体面处理，可能让别人忽视你的真实不满", "有时为了维护关系，会牺牲自己的感受", "容易承担情绪劳动"],
+                advice: "你的高情商很宝贵，但不要把所有尴尬都变成自己的责任。真正成熟的关系，不应该只靠你一个人维持体面。"
+            },
+            "Ice_Ice": { 
+                title: "太上老君型打工人", 
+                quote: "我叫你一声，你敢答应吗？", 
+                image: "./太上老君.jpg", // 用户上传的太上老君图
+                summary: "你不是多疑，你只是知道职场里很多事最后都要靠证据说话。",
+                explanation: "太上老君型用户谨慎、理性、重视规则和证据。你不喜欢口头约定，也不喜欢模糊分工。遇到复杂合作、甩锅风险、借车这种场景，你会本能地确认责任和边界。",
+                behaviors: ["重要事情会留痕", "合作前喜欢明确分工", "不轻易相信口头承诺", "面对甩锅会拿事实说话", "对风险有提前预判"],
+                pros: ["不容易被坑", "逻辑清楚", "责任意识强", "适合复杂项目管理"],
+                cons: ["有时会显得不够松弛", "容易让别人觉得你太谨慎", "如果过度防御，可能影响信任建立"],
+                advice: "你的风险意识是职场保护罩。但也可以根据对象和场景调整防御等级，不是每个人都值得信任，也不是每个人都需要防到满级。"
+            },
+            "Fire_Ice": { 
+                title: "二郎神型打工人", 
+                quote: "我当是谁，原来是弼马温！", 
+                image: "./二郎神.jpg", // 用户上传的二郎神图
+                summary: "你不是难相处，你只是讨厌别人越界还装无辜。",
+                explanation: "二郎神型用户边界清楚，规则感强，面对不合理请求时更敢说“不”。你不太会为了维持表面关系而牺牲自己。你可以合作，但前提是责任清楚、边界清楚、规则清楚。",
+                behaviors: ["拒绝能力强", "不喜欢被人情绑架", "面对甩锅会直接追问", "对职责边界非常敏感", "别人越界时不会一直忍"],
+                pros: ["边界清楚", "不容易被占便宜", "敢于表达", "能保护自己的时间和资源"],
+                cons: ["有时容易显得强硬", "在关系型团队中可能被误解为不好说话", "需要注意表达方式，避免对抗感太强"],
+                advice: "你的边界感很重要。如果能在表达边界时多一点缓冲，你会既保护自己，又减少不必要的关系损耗。"
+            },
+            "Fire_Fire": { 
+                title: "牛魔王型打工人", 
+                quote: "我乃平天大圣牛魔王", 
+                image: "./牛魔王.jpg", // 用户上传的牛魔王图
+                summary: "你不迷信情怀，你只看资源、位置和实际回报。",
+                explanation: "牛魔王型用户非常现实，也很会判断局势。你不会只因为谁对你好、谁说得好听就轻易站队。你更关心：谁有资源，谁能兑现，谁能带来机会，谁值得长期投入。",
+                behaviors: ["选择领导时看资源和机会", "面对团队变化会评估利益格局", "对薪资、奖金、晋升敏感", "不轻易被情怀打动", "对“成长”这类说法会追问实际收益"],
+                pros: ["判断现实", "资源意识强", "不容易被空话带偏", "适合在复杂组织中生存"],
+                cons: ["有时容易显得功利", "对关系中的情感因素关注较少", "如果只看利益，可能忽略长期信任"],
+                advice: "你的现实感很适合职场，但也要注意，不是所有价值都能立刻折算成资源。真正值得跟随的人，既要看当下资源，也要看长期信用。"
+            },
+            "Wind_Ice": { 
+                title: "白骨精型打工人", 
+                quote: "你是猴子请来的救兵吗？", 
+                image: "./白骨精.jpg", // 用户上传的白骨精图
+                summary: "你不是心机重，你只是很清楚职场不能只看表面。",
+                explanation: "白骨精型用户观察力强，防御心也比较强。你不会轻易相信任何一方，也不会轻易把真实想法暴露出来。你很懂职场里的复杂关系，遇到新领导、前领导、同事邀请、跨部门局时，你都会先观察，再决定要不要行动。",
+                behaviors: ["不轻易交底", "会观察每个人背后的利益关系", "表面可以配合，心里有自己的判断", "遇到变化先打听消息", "不会轻易把自己绑定在某一方"],
+                pros: ["生存能力强", "会看局势", "不容易被单方面信息带偏", "能在复杂关系中保护自己"],
+                cons: ["容易过度防备", "很难真正信任别人", "如果长期处于观察状态，可能错过主动争取机会"],
+                advice: "你的观察力很强，但也要注意，不是所有人都只是在算计。该防的时候防，该出手的时候也要出手。只观察不行动，也会错过位置。"
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let answers = {};
+
+        function getElement(id) {
+            return document.getElementById(id);
+        }
+
+        function showScreen(screenId) {
+            ['home-screen', 'question-screen', 'result-screen', 'contact-screen'].forEach(id => {
+                const el = getElement(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('fade-in');
+                }
+            });
+            const screen = getElement(screenId);
+            screen.classList.remove('hidden');
+            // Trigger reflow to restart animation
+            void screen.offsetWidth;
+            screen.classList.add('fade-in');
+        }
+
+        function startTest() {
+            currentQuestionIndex = 0;
+            answers = {};
+            renderQuestion();
+            showScreen('question-screen');
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestionIndex];
+            
+            getElement('progress-text').innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
+            getElement('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+            
+            // 控制“上一题”按钮的显示/隐藏
+            const prevBtn = getElement('prev-btn');
+            if (currentQuestionIndex > 0) {
+                prevBtn.classList.remove('hidden');
+                prevBtn.classList.add('inline-flex');
+            } else {
+                prevBtn.classList.add('hidden');
+                prevBtn.classList.remove('inline-flex');
+            }
+
+            getElement('question-title').innerText = q.text;
+            
+            const optionsContainer = getElement('options-container');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                // 如果用户之前选过这个选项，给它加上一个选中的高亮样式
+                const isSelected = answers[currentQuestionIndex] === opt.value;
+                const activeClass = isSelected ? 'border-indigo-400 bg-indigo-900/30 ring-1 ring-indigo-500' : 'border-gray-600 bg-gray-800/50 hover:border-indigo-400';
+                
+                btn.className = `option-btn w-full text-left p-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 transition-all duration-200 ${activeClass}`;
+                btn.innerHTML = `<span class="inline-block w-6 font-bold text-indigo-400">${String.fromCharCode(65 + index)}.</span> <span class="text-gray-200">${opt.text}</span>`;
+                btn.onclick = () => selectOption(opt.value);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function selectOption(value) {
+            answers[currentQuestionIndex] = value;
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                setTimeout(() => {
+                    renderQuestion();
+                }, 150);
+            } else {
+                calculateResult();
+            }
+        }
+
+        function calculateResult() {
+            // 统计所有 6 个维度的得分
+            let scores = {
+                boundary: 0,     // 边界感+反击性 (拒绝越界)
+                observation: 0,  // 风险意识 (先观察打听)
+                obedience: 0,    // 服从度 (先忍、先配合)
+                resource: 0,     // 公平感/资源现实 (关注钱/机会)
+                social: 0,       // 社交能量 (愿意社交)
+                rebellion: 0,    // 反击性/风险意识 (当场追责)
+                fairness: 0,     // 强公平感
+                risk: 0          // 强风险意识/留痕
+            };
+
+            for (let i = 0; i < questions.length; i++) {
+                if (answers[i]) {
+                    scores[answers[i]]++;
+                }
+            }
+
+            // 根据高分组合匹配角色
+            let personaKey = "Earth_Ice"; // 默认沙僧兜底
+
+            // 提取最高的两个维度
+            let sortedDims = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+            let top1 = sortedDims[0];
+            let top2 = sortedDims[1];
+            
+            // 为了方便判断，构建一个组合字符串 (包含前两个维度)
+            let combo = [top1, top2].sort().join('_');
+            
+            // 匹配逻辑 (基于用户提供的图表)
+            if (scores.rebellion > 1 && scores.fairness > 1) {
+                personaKey = "Fire_Wind"; // 孙悟空：反击性高 + 公平感高
+            } else if (scores.boundary > 1 && (scores.fairness > 1 || scores.risk > 1)) {
+                personaKey = "Ice_Earth"; // 唐僧：边界感高 + 原则感强
+            } else if (scores.resource > 1 && scores.boundary > 0) {
+                personaKey = "Wind_Earth"; // 猪八戒：回报意识高 + 抗消耗高
+            } else if (scores.obedience > 2) {
+                personaKey = "Earth_Ice"; // 沙僧：服从度高 + 稳定性高
+            } else if (scores.obedience > 1 && scores.social === 0) {
+                personaKey = "Earth_Earth"; // 白龙马：服从度高 + 表达低
+            } else if (scores.social > 2) {
+                personaKey = "Wind_Wind"; // 观音：社交能量高
+            } else if (scores.risk > 2 || (scores.risk > 1 && scores.observation > 1)) {
+                personaKey = "Ice_Ice"; // 太上老君：风险意识高 + 留痕意识高
+            } else if (scores.boundary > 2 || (scores.boundary > 1 && scores.rebellion > 0)) {
+                personaKey = "Fire_Ice"; // 二郎神：边界感高 + 反击性高
+            } else if (scores.resource > 2 || (scores.resource > 1 && scores.fairness > 1)) {
+                personaKey = "Fire_Fire"; // 牛魔王：公平感高 + 资源意识高
+            } else if (scores.observation > 2) {
+                personaKey = "Wind_Ice"; // 白骨精：风险意识高 + 观察性高
+            }
+
+            const pData = personasData[personaKey] || personasData["Earth_Ice"];
+            
+            // 渲染数据
+            getElement('result-title').innerText = pData.title;
+            getElement('result-image').src = pData.image; // 设置角色头像
+            getElement('result-quote').innerText = `"${pData.quote}"`;
+            getElement('result-summary').innerText = pData.summary;
+            getElement('result-explanation').innerText = pData.explanation;
+            
+            // 渲染列表 (表现)
+            const behaviorsHtml = pData.behaviors.map(b => `<li>${b}</li>`).join('');
+            getElement('result-behaviors').innerHTML = behaviorsHtml;
+            
+            // 渲染列表 (优势)
+            const prosHtml = pData.pros.map(p => `<li>${p}</li>`).join('');
+            getElement('result-pros').innerHTML = prosHtml;
+            
+            // 渲染列表 (风险)
+            const consHtml = pData.cons.map(c => `<li>${c}</li>`).join('');
+            getElement('result-cons').innerHTML = consHtml;
+            
+            // 渲染建议
+            getElement('result-advice').innerText = pData.advice;
+            
+            showScreen('result-screen');
+        }
+
+        function restartTest() {
+            showScreen('home-screen');
+        }
+
+        function showContactPage() {
+            showScreen('contact-screen');
+        }
+
+        function backToResult() {
+            showScreen('result-screen');
+        }
+
+        function shareResult() {
+            const title = getElement('result-title').innerText;
+            const quote = getElement('result-quote').innerText;
+            const shareText = `我在【撕开你的职场面具】测试中测出了：\n${title}\n${quote}\n\n快来测测你的真实职场底色吧！`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '撕开你的职场面具',
+                    text: shareText,
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        alert("结果已复制到剪贴板，快去分享给朋友吧！");
+                    }).catch(() => {
+                        alert("分享功能暂不可用，请截图分享哦~");
+                    });
+                } else {
+                    // Fallback for non-HTTPS or missing clipboard API
+                    const textArea = document.createElement("textarea");
+                    textArea.value = shareText;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    textArea.style.top = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert("结果已复制到剪贴板，快去分享给朋友吧！");
+                    } catch (err) {
+                        alert("分享功能暂不可用，请截图分享哦~");
+                    }
+                    textArea.remove();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
