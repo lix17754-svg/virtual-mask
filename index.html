@@ -56,6 +56,13 @@
         .animate-float-tag {
             animation: float-tag 3s ease-in-out infinite;
         }
+        @keyframes bounce-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+        .animate-bounce-down {
+            animation: bounce-down 2s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center p-4 py-8">
@@ -138,10 +145,18 @@
                     </div>
                 </div>
                 
-                <!-- 右侧头像区 (正方形) -->
-                <div class="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-2xl overflow-hidden border-2 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)] bg-gray-800">
+                <!-- 右侧角色图 (独立占据空间，视觉焦点) -->
+            <div class="relative flex flex-col items-center mb-8">
+                <div class="w-48 h-48 md:w-56 md:h-56 mx-auto rounded-xl overflow-hidden border-4 border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.3)] transform rotate-3 hover:rotate-0 transition-transform duration-500 z-10 relative">
                     <img id="result-image" src="" alt="角色头像" class="w-full h-full object-cover">
                 </div>
+                
+                <!-- 向下滚动提示箭头 -->
+                <div class="mt-8 flex flex-col items-center text-gray-400/80 animate-bounce-down md:hidden">
+                    <span class="text-xs tracking-widest mb-1 font-medium text-indigo-300">向下滑动查看解析</span>
+                    <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                </div>
+            </div>
             </div>
             
             <!-- Quote (全宽) -->
@@ -462,7 +477,9 @@
                 
                 btn.className = `option-btn w-full text-left p-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 transition-all duration-200 ${activeClass}`;
                 btn.innerHTML = `<span class="inline-block w-6 font-bold text-indigo-400">${String.fromCharCode(65 + index)}.</span> <span class="text-gray-200">${opt.text}</span>`;
-                btn.onclick = () => selectOption(opt.value);
+                
+                // 将 index 传给 selectOption，用于视觉高亮
+                btn.onclick = () => selectOption(opt.value, index);
                 optionsContainer.appendChild(btn);
             });
         }
@@ -474,15 +491,26 @@
             }
         }
 
-        function selectOption(value) {
+        function selectOption(value, index) {
             answers[currentQuestionIndex] = value;
+            
+            // 点击时的视觉反馈
+            const buttons = document.querySelectorAll('#options-container button');
+            buttons.forEach(btn => {
+                btn.className = "option-btn w-full text-left p-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 transition-all duration-200 border-gray-600 bg-gray-800/50 hover:border-indigo-400";
+            });
+            const clickedBtn = buttons[index];
+            clickedBtn.className = "option-btn w-full text-left p-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 transition-all duration-200 border-indigo-400 bg-indigo-900/30 ring-1 ring-indigo-500 transform scale-[1.02]";
+
             if (currentQuestionIndex < questions.length - 1) {
-                currentQuestionIndex++;
                 setTimeout(() => {
+                    currentQuestionIndex++;
                     renderQuestion();
-                }, 150);
+                }, 250); // 稍微延长一点时间，让用户看清自己选了什么
             } else {
-                calculateResult();
+                setTimeout(() => {
+                    calculateResult();
+                }, 250);
             }
         }
 
