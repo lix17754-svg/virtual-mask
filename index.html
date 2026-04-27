@@ -602,8 +602,17 @@
         }
 
         function restartTest() {
-            // 清除本地缓存，重新开始
+            // 清除本地缓存，重置数据
             localStorage.removeItem('virtualMaskResult');
+            currentQuestionIndex = 0;
+            answers = {};
+            
+            // 确保结果页滚动条回到顶部，避免出现上次划完的位置
+            const resultScreen = getElement('result-screen');
+            if (resultScreen) {
+                resultScreen.scrollTop = 0;
+            }
+            
             showScreen('home-screen');
         }
 
