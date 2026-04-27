@@ -114,7 +114,7 @@
             <div class="flex justify-between items-center mb-6 text-sm text-gray-300">
                 <button id="prev-btn" onclick="prevQuestion()" class="text-indigo-400 hover:text-indigo-300 focus:outline-none transition-colors hidden flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    上一题
+                    回溯上题
                 </button>
                 <div class="flex-1 text-center font-mono" id="progress-text">1 / 20</div>
             </div>
@@ -501,15 +501,16 @@
             const clickedBtn = buttons[index];
             clickedBtn.className = "option-btn w-full text-left p-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 transition-all duration-200 border-indigo-400 bg-indigo-900/30 ring-1 ring-indigo-500 transform scale-[1.02]";
 
+            // 延迟时间加长到 450ms，给用户足够的时间确认自己选了什么
             if (currentQuestionIndex < questions.length - 1) {
                 setTimeout(() => {
                     currentQuestionIndex++;
                     renderQuestion();
-                }, 250); // 稍微延长一点时间，让用户看清自己选了什么
+                }, 450); 
             } else {
                 setTimeout(() => {
                     calculateResult();
-                }, 250);
+                }, 450);
             }
         }
 
@@ -566,6 +567,13 @@
                 personaKey = "Wind_Ice"; // 白骨精：风险意识高 + 观察性高
             }
 
+            // 保存结果到本地缓存
+            localStorage.setItem('virtualMaskResult', personaKey);
+            
+            renderResult(personaKey);
+        }
+
+        function renderResult(personaKey) {
             const pData = personasData[personaKey] || personasData["Earth_Ice"];
             
             // 渲染数据
@@ -594,6 +602,8 @@
         }
 
         function restartTest() {
+            // 清除本地缓存，重新开始
+            localStorage.removeItem('virtualMaskResult');
             showScreen('home-screen');
         }
 
@@ -643,6 +653,15 @@
                 }
             }
         }
+
+        // 页面加载时检查是否有历史结果
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedResult = localStorage.getItem('virtualMaskResult');
+            // 如果有历史结果，并且结果数据合法
+            if (savedResult && personasData[savedResult]) {
+                renderResult(savedResult);
+            }
+        });
     </script>
 </body>
 </html>
